@@ -1,0 +1,85 @@
+==
+vi roles/apache/tasks/main.yml
+# tasks file for apache
+---
+-
+  name: "Install httpd Package"
+  yum: "name=httpd state=latest"
+-
+  name: "Copy httpd configuration file"
+  template: "src=httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf"
+-
+  copy: "src=index.html dest=/var/www/html" # /home/ansible/project/roles/apache/files/
+  name: "Copy index.html file"
+  
+  notify:
+    - "restart apache"
+
+====== ls roles/apache/files/index.html ====
+  <h1> Test file </h1>
+  
+====== vi roles/apache/defaults/main.yml ===
+---
+# defaults file for apache
+base_httpd_listen_port: 80
+~
+
+===== ls roles/apache/handlers/main.yml ===
+
+# handlers file for apache
+---
+-
+  name: "restart apache"
+  service: "name=httpd state=restarted"
+
+===== ls roles/apache/templates/httpd.conf.j2 ==
+# This is the main Apache HTTP server configuration file.  It contains the
+# configuration directives that give the server its instructions.
+# See <URL:http://httpd.apache.org/docs/2.4/> for detailed information.
+# In particular, see
+# <URL:http://httpd.apache.org/docs/2.4/mod/directives.html>
+# for a discussion of each configuration directive.
+
+====== ls roles/apache/tests/ ===
+inventory  test.yml
+ls roles/apache/tests/inventory == localhost
+ls roles/apache/tests/test.yml ==
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - apache
+
+=====  ls roles/apache/vars/main.yml ====
+
+---
+# vars file for apache
+
+==== README.md =======
+## Standalone Tomcat Deployment
+- Requires Ansible 1.2 or newer
+- Expects CentOS/RHEL 6.x hosts
+
+These playbooks deploy a very basic implementation of Tomcat Application Server,
+version 7. To use them, first edit the "hosts" inventory file to contain the
+hostnames of the machines on which you want Tomcat deployed, and edit the
+group_vars/tomcat-servers file to set any Tomcat configuration parameters you need.
+
+Then run the playbook, like this:
+
+        ansible-playbook -i hosts site.yml
+
+When the playbook run completes, you should be able to see the Tomcat
+Application Server running on the ports you chose, on the target machines.
+
+This is a very simple playbook and could serve as a starting point for more
+complex Tomcat-based projects.
+
+### Ideas for Improvement
+
+Here are some ideas for ways that these playbooks could be extended:
+
+- Write a playbook to deploy an actual application into the server.
+- Deploy Tomcat clustered with a load balancer in front.
+
+ 
